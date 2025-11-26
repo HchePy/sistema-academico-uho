@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - UHO{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock %}
+
+{% block body_class %}login-body{% endblock %}
+
+{% block navbar %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid login-container">
+    <div class="row h-100">
+        <!-- Carrusel de Noticias-->
+        <div class="col-md-7 d-none d-md-block">
+            <div class="news-section">
+                <div id="newsCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+                    <div class="carousel-inner h-100">
+                        <!-- Noticia 1 -->
+                        <div class="carousel-item active h-100">
+                            <div class="news-card">
+                                <span class="news-badge">
+                                    <i class="fas fa-bullhorn me-1"></i>Importante
+                                </span>
+                                <h2 class="news-title">Suspensión de Clases</h2>
+                                <div class="news-content">
+                                    <p><strong>Fecha:</strong> 26 de Noviembre 2024</p>
+                                    <p>Se informa que las clases de la facultad de Ingeniería estarán suspendidas este viernes debido a actividades de mantenimiento.</p>
+                                    <p>Las clases se reanudarán normalmente el lunes próximo.</p>
+                                </div>
+                                <div class="news-date">
+                                    <i class="fas fa-clock me-1"></i>Publicado hoy
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Noticia 2 -->
+                        <div class="carousel-item h-100">
+                            <div class="news-card">
+                                <span class="news-badge urgent">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Urgente
+                                </span>
+                                <h2 class="news-title">Fechas de Exámenes</h2>
+                                <div class="news-content">
+                                    <p>Se publican las fechas de exámenes finales del semestre:</p>
+                                    <ul>
+                                        <li>Matemáticas: 10 de Diciembre</li>
+                                        <li>Programación: 12 de Diciembre</li>
+                                        <li>Base de Datos: 15 de Diciembre</li>
+                                    </ul>
+                                    <p>Consultar horarios y aulas en el departamento.</p>
+                                </div>
+                                <div class="news-date">
+                                    <i class="fas fa-clock me-1"></i>Publicado ayer
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Noticia 3 -->
+                        <div class="carousel-item h-100">
+                            <div class="news-card">
+                                <span class="news-badge info">
+                                    <i class="fas fa-info-circle me-1"></i>Informativo
+                                </span>
+                                <h2 class="news-title">Sistema Offline Disponible</h2>
+                                <div class="news-content">
+                                    <p>El sistema académico ahora funciona en modo offline. Puedes consultar:</p>
+                                    <ul>
+                                        <li>Estado de clases</li>
+                                        <li>Calificaciones</li>
+                                        <li>Horarios</li>
+                                        <li>Fechas de revisión</li>
+                                    </ul>
+                                    <p>Los datos se actualizan automáticamente cuando hay conexión WiFi en la universidad.</p>
+                                </div>
+                                <div class="news-date">
+                                    <i class="fas fa-clock me-1"></i>Publicado hace 2 días
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Controles del carrusel -->
+                    <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Anterior</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Siguiente</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- form-->
+        <div class="col-md-5">
+            <div class="login-section">
+                <div class="login-card">
+                    <div class="card-body p-4">
+                        <!--titulo-->
+                        <div class="text-center mb-4">
+                            <div class="login-logo mb-3">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark">UHO Sistema Académico</h3>
+                            <p class="text-muted">Ingrese sus credenciales</p>
+                        </div>
+
+                        <!-- form login total -->
+                        <form id="loginForm">
+                            <!-- user -->
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Usuario</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="username" 
+                                           placeholder="Ingrese su usuario" required>
+                                </div>
+                            </div>
+                            
+                            <!-- pass -->
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Contraseña</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    <input type="password" class="form-control" id="password" 
+                                           placeholder="Ingrese su contraseña" required>
+                                    <button type="button" class="input-group-text password-toggle" 
+                                            onclick="togglePassword()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- sesion -->
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="remember">
+                                <label class="form-check-label" for="remember">
+                                    Recordar sesión
+                                </label>
+                            </div>
+
+                            <!-- btn login -->
+                            <button type="submit" class="btn btn-uho w-100 mb-3">
+                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                            </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/login.js' %}"></script>
+{% endblock %}

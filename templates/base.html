@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}UHO - Sistema Académico{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- css global-->
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    
+    <!-- css especifico -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    
+    <!-- Navbar -->
+    {% block navbar %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-graduation-cap me-2"></i>
+                UHO Sistema Académico
+            </a>
+        </div>
+    </nav>
+    {% endblock %}
+    
+    <!-- Contenido principal -->
+    <main>
+        {% block content %}
+        <!-- contenido de cada página va aquí -->
+        {% endblock %}
+    </main>
+    
+    <!-- Footer -->
+    {% block footer %}
+    <footer class="bg-dark text-light py-3 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 Universidad de Holguín</p>
+        </div>
+    </footer>
+    {% endblock %}
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Js especifico -->
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Js global -->
+    <script src="{% static 'js/main.js' %}"></script>
+</body>
+</html>
