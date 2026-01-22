@@ -1,0 +1,36 @@
+/* Estilos específicos para el Estudiante */
+:root {
+    --uho-navy: #000080;
+    --uho-light-grey: #f8f9fa;
+}
+
+body {
+    background-color: var(--uho-light-grey);
+}
+
+.card {
+    border-radius: 12px;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+}
+
+.featured-card {
+    background: linear-gradient(135deg, var(--uho-navy) 0%, #0000cd 100%);
+    color: white;
+}
+
+.section-title {
+    color: var(--uho-navy);
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+.news-item {
+    border-left: 4px solid var(--uho-navy);
+    padding-left: 1rem;
+}

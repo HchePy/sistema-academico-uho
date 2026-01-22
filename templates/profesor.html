@@ -1,0 +1,574 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Profesor - UHO{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/profesor.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}Panel de Control / Profesor{% endblock %}
+
+{% block content %}
+<div class="row g-4 mb-5">
+    <div class="col-12 d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <h2 class="section-title mb-0">Mi Panel de Gestión</h2>
+            <p class="text-muted small">Bienvenido de nuevo, {{ user.username }}</p>
+        </div>
+        <div class="text-end">
+            <span class="badge bg-white text-dark shadow-sm py-2 px-3 rounded-pill border">
+                <i class="fas fa-calendar-day me-2 text-primary"></i>Semestre Actual: 2024-2
+            </span>
+        </div>
+    </div>
+
+    <!-- Panel de Métricas (Estilo Mejorado) -->
+    <div class="col-md-4">
+        <div class="card card-metric p-4 h-100">
+            <div class="d-flex align-items-center">
+                <div class="metric-icon bg-primary-subtle text-primary me-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-navy">{{ metricas.total_alumnos }}</h3>
+                    <p class="text-muted small mb-0">Total Estudiantes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-metric p-4 h-100">
+            <div class="d-flex align-items-center">
+                <div class="metric-icon bg-success-subtle text-success me-3">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-navy">{{ metricas.promedio_grupal }}</h3>
+                    <p class="text-muted small mb-0">Promedio General</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-metric p-4 h-100">
+            <div class="d-flex align-items-center">
+                <div class="metric-icon bg-warning-subtle text-warning me-3">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold text-navy">{{ metricas.tareas_pendientes }}</h3>
+                    <p class="text-muted small mb-0">Revisores Pendientes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botones de Acción Rápida -->
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm p-3 h-100 bg-white">
+            <h6 class="fw-bold mb-3 text-navy"><i class="fas fa-bolt me-2 text-warning"></i>Acciones Rápidas</h6>
+            <div class="d-grid gap-3">
+                <button class="btn btn-action-uho" data-bs-toggle="modal" data-bs-target="#noticiaModal">
+                    <i class="fas fa-bullhorn text-warning"></i>Noticias
+                </button>
+                <button class="btn btn-action-uho" data-bs-toggle="modal" data-bs-target="#subirNotasModal">
+                    <i class="fas fa-upload text-primary"></i>Subir Notas
+                </button>
+                {% if user.profesor.nivel == 'jefe de carrera' %}
+                <button class="btn btn-action-uho" data-bs-toggle="modal" data-bs-target="#gestionProfesoresModal">
+                    <i class="fas fa-chalkboard-teacher text-success"></i>Gestionar Profesores
+                </button>
+                <button class="btn btn-action-uho" data-bs-toggle="modal" data-bs-target="#subirHorariosModal">
+                    <i class="fas fa-calendar-alt text-info"></i>Subir Horarios
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabla de Asignaturas -->
+    <div class="col-md-9">
+        <div class="card table-container bg-white">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold text-navy"><i class="fas fa-book me-2"></i>Mis Asignaturas</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light-subtle">
+                        <tr class="small text-uppercase text-muted fw-bold">
+                            <th class="ps-4">Asignatura</th>
+                            <th>Carrera</th>
+                            <th>Progreso del Curso</th>
+                            <th class="text-end pe-4">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for materia in materias %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold text-navy">{{ materia.nombre }}</div>
+                                <div class="small text-muted">{{ materia.año }}º Año</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark fw-normal border">{{ materia.carrera }}</span>
+                            </td>
+                            <td style="min-width: 150px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px;">
+                                        <div class="progress-bar bg-primary rounded-pill"
+                                            style="width: {{ materia.progreso_temario }}%"></div>
+                                    </div>
+                                    <small class="text-muted fw-bold">{{ materia.progreso_temario }}%</small>
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <button class="btn btn-sm btn-light rounded-pill px-3 shadow-sm text-primary fw-bold"
+                                    data-materia-id="{{ materia.id }}" data-materia-nombre="{{ materia.nombre }}"
+                                    onclick="verDetallesAsignatura({{ materia.id }}, '{{ materia.nombre }}')">Ver
+                                    Detalles</button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-5 text-muted">Aún no tienes asignaturas asignadas.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Subir Notas -->
+<div class="modal fade" id="subirNotasModal" tabindex="-1" aria-labelledby="subirNotasModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="subirNotasModalLabel"><i class="fas fa-upload me-2"></i>Subir
+                    Archivo de Notas</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="subirNotasAlerta"></div>
+                <form id="formSubirNotas">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Seleccionar archivo Excel (.xlsx)</label>
+                        <input type="file" class="form-control rounded-3" id="archivo" name="archivo"
+                            accept=".xlsx,.xls" required>
+                        <small class="text-muted d-block mt-2"><i class="fas fa-info-circle"></i> Solo se aceptan
+                            archivos Excel (.xlsx o .xls)</small>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Carrera</label>
+                            <select class="form-select form-select-sm rounded-3" id="carrera_id" name="carrera_id"
+                                required onchange="cargarMateriasPorCarrera()">
+                                <option value="" selected disabled>Seleccionar carrera...</option>
+                                {% for c in carreras %}
+                                <option value="{{ c.id }}">{{ c.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Año Académico</label>
+                            <select class="form-select form-select-sm rounded-3" id="anio" name="anio" required
+                                onchange="cargarMateriasPorCarrera()">
+                                <option value="" selected disabled>Seleccionar año...</option>
+                                <option value="1">1º Año</option>
+                                <option value="2">2º Año</option>
+                                <option value="3">3º Año</option>
+                                <option value="4">4º Año</option>
+                                <option value="5">5º Año</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold">Materia</label>
+                            <select class="form-select form-select-sm rounded-3" id="materia_id" name="materia_id"
+                                required>
+                                <option value="" selected disabled>Primero seleccione carrera y año...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="alert alert-info rounded-3 small" role="alert">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Formato del archivo Excel (muy simple):</strong>
+                        <ul class="mb-0 mt-2 small">
+                            <li><strong>Columna A:</strong> Nombre del estudiante (ej: Juan, María)</li>
+                            <li><strong>Columna B:</strong> Nota (0-5)</li>
+                        </ul>
+                        <small class="text-muted d-block mt-2">
+                            <i class="fas fa-info-circle me-1"></i>
+                            La primera fila debe contener los encabezados. El sistema ignora tildes y mayúsculas.
+                        </small>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 ms-2">
+                            <i class="fas fa-upload me-2"></i>Subir Notas
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gestión de Noticias -->
+<div class="modal fade" id="noticiaModal" tabindex="-1" aria-labelledby="noticiaModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold" id="noticiaModalLabel">Gestión de Noticias</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- TABS -->
+                <ul class="nav nav-tabs mb-4 px-2" id="newsTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active fw-bold" id="publicar-tab" data-bs-toggle="tab"
+                            data-bs-target="#publicar-panel" type="button" role="tab">Publicar Noticia</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link fw-bold" id="ver-tab" data-bs-toggle="tab" data-bs-target="#ver-panel"
+                            type="button" role="tab">Ver Noticias</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="newsTabsContent">
+                    <!-- PANEL PUBLICAR -->
+                    <div class="tab-pane fade show active" id="publicar-panel" role="tabpanel">
+                        <form id="formNuevaNoticia" class="px-2">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Título</label>
+                                <input type="text" class="form-control rounded-3" id="noticia_titulo" required
+                                    placeholder="Ej: Cambio en Fecha de Examen">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Contenido</label>
+                                <textarea class="form-control rounded-3" id="noticia_contenido" rows="4" required
+                                    placeholder="Escribe el mensaje para tus estudiantes..."></textarea>
+                            </div>
+                            <!-- Público Objetivo -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Dirigido a:</label>
+                                    <select class="form-select form-select-sm rounded-3" id="noticia_visible_para"
+                                        onchange="toggleSegmentacion()">
+                                        <option value="estudiantes">Estudiantes</option>
+                                        <option value="profesores">Profesores</option>
+                                        <option value="todos">Público General (Todos)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 segmentation-field" id="div_carrera">
+                                    <label class="form-label small fw-bold">Carrera:</label>
+                                    <select class="form-select form-select-sm rounded-3" id="noticia_carrera">
+                                        <option value="">Todas las Carreras</option>
+                                        {% for c in carreras %}
+                                        <option value="{{ c.id }}">{{ c.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 segmentation-field" id="div_año">
+                                    <label class="form-label small fw-bold">Año:</label>
+                                    <select class="form-select form-select-sm rounded-3" id="noticia_año">
+                                        <option value="">Todos los Años</option>
+                                        <option value="1">1º Año</option>
+                                        <option value="2">2º Año</option>
+                                        <option value="3">3º Año</option>
+                                        <option value="4">4º Año</option>
+                                        <option value="5">5º Año</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Categoría -->
+                            <div class="mb-4">
+                                <label class="form-label small fw-bold d-block mb-2">Categoría del Aviso:</label>
+                                <div class="d-flex gap-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="noticia_categoria"
+                                            id="cat_aviso" value="aviso" checked>
+                                        <label class="form-check-label small" for="cat_aviso">Aviso</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="noticia_categoria"
+                                            id="cat_examen" value="examen">
+                                        <label class="form-check-label small" for="cat_examen">Examen</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="noticia_categoria"
+                                            id="cat_evento" value="evento">
+                                        <label class="form-check-label small" for="cat_evento">Evento</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <button type="submit" id="btnPublicar" class="btn btn-primary rounded-pill px-5 py-2">
+                                    <i class="fas fa-paper-plane me-2"></i>Publicar Ahora</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- PANEL VER -->
+                    <div class="tab-pane fade px-2" id="ver-panel" role="tabpanel">
+                        <div id="listaNoticias" class="list-group list-group-flush rounded-3 overflow-hidden border">
+                            <!-- Aquí se cargan las noticias -->
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <p class="small text-muted mt-2">Cargando noticias...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% if user.profesor.nivel == 'jefe de carrera' %}
+
+<!-- Modal Subir Horarios -->
+<div class="modal fade" id="subirHorariosModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-calendar-alt me-2"></i>Subir Horarios</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formSubirHorarios">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Archivo Excel (.xlsx)</label>
+                        <input type="file" class="form-control rounded-3" id="archivo_horario" name="archivo"
+                            accept=".xlsx,.xls" required>
+                        <small class="text-muted d-block mt-2"><i class="fas fa-info-circle"></i> Solo archivos
+                            Excel</small>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Carrera</label>
+                            <select class="form-select rounded-3" id="carrera_id_horario" name="carrera_id" required>
+                                <option value="" selected disabled>Seleccionar...</option>
+                                {% for c in carreras %}
+                                <option value="{{ c.id }}">{{ c.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Año</label>
+                            <select class="form-select rounded-3" id="anio_horario" name="anio" required>
+                                <option value="" selected disabled>Seleccionar...</option>
+                                <option value="1">1º Año</option>
+                                <option value="2">2º Año</option>
+                                <option value="3">3º Año</option>
+                                <option value="4">4º Año</option>
+                                <option value="5">5º Año</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="reemplazar_horarios" name="reemplazar"
+                            value="true">
+                        <label class="form-check-label small" for="reemplazar_horarios">
+                            Reemplazar horarios existentes
+                        </label>
+                    </div>
+                    <div class="alert alert-info rounded-3 small">
+                        <i class="fas fa-lightbulb me-2"></i><strong>Formato Excel:</strong>
+                        <ul class="mb-0 mt-2 small">
+                            <li><strong>Col A:</strong> Materia</li>
+                            <li><strong>Col B:</strong> Día (Lunes-Domingo)</li>
+                            <li><strong>Col C:</strong> Hora Inicio (HH:MM)</li>
+                            <li><strong>Col D:</strong> Hora Fin (HH:MM)</li>
+                            <li><strong>Col E:</strong> Aula (opcional)</li>
+                        </ul>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-info rounded-pill px-4 ms-2">
+                            <i class="fas fa-upload me-2"></i>Subir
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Gestión de Profesores -->
+<div class="modal fade" id="gestionProfesoresModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-navy"><i class="fas fa-chalkboard-teacher me-2"></i>Gestión de
+                    Profesores</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row h-100">
+                    <!-- Columna Izquierda: Lista de Profesores -->
+                    <div class="col-md-4 border-end">
+                        <div class="p-2">
+                            <div id="listaProfesoresContainer" class="list-group list-group-flush overflow-auto"
+                                style="max-height: 500px;">
+                                {% for p in lista_profesores %}
+                                <a href="#"
+                                    class="list-group-item list-group-item-action p-3 border-bottom profesor-item"
+                                    data-id="{{ p.id }}" data-nombre="{{ p.nombre }}" data-email="{{ p.email }}"
+                                    data-nivel="{{ p.nivel }}" data-carrera="{{ p.carrera_id }}"
+                                    data-materias='{{ p.materias_ids_json }}'
+                                    onclick="event.preventDefault(); seleccionarProfesorLocal(this)">
+
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1 fw-bold text-navy">{{ p.nombre }}</h6>
+                                        <span
+                                            class="badge {% if p.nivel == 'jefe de carrera' %}bg-warning text-dark{% else %}bg-primary{% endif %} rounded-pill"
+                                            style="font-size:0.75em">{{ p.nivel|title }}</span>
+                                    </div>
+                                    <p class="mb-1 small text-secondary">{{ p.carrera_nombre }}</p>
+
+                                    {% if p.materias_count > 0 %}
+                                    <small class="d-block text-muted mt-1"><i class="fas fa-book me-1"></i>{{
+                                        p.materias_count }} materias</small>
+                                    {% else %}
+                                    <small class="d-block text-warning mt-1"><i
+                                            class="fas fa-exclamation-triangle me-1"></i>Sin asignaciones</small>
+                                    {% endif %}
+                                </a>
+                                {% empty %}
+                                <div class="text-center p-5 text-muted">
+                                    <i class="fas fa-users-slash fa-2x mb-3 text-secondary-subtle"></i>
+                                    <p>No se encontraron profesores.</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Columna Derecha: Formulario de Edición -->
+                    <div class="col-md-8">
+                        <div id="detalleProfesorEmpty"
+                            class="d-flex flex-column align-items-center justify-content-center h-100 text-muted p-5">
+                            <i class="fas fa-user-edit fa-3x mb-3 text-secondary-subtle"></i>
+                            <p>Selecciona un profesor de la lista para editar sus asignaciones.</p>
+                        </div>
+
+                        <div id="detalleProfesorForm" class="d-none p-3 h-100 overflow-auto">
+                            <div class="d-flex justify-content-between align-items-start mb-4">
+                                <div>
+                                    <h4 class="mb-0 fw-bold text-navy" id="editProfesorNombre">Nombre Profesor</h4>
+                                    <small class="text-muted" id="editProfesorEmail">email@uho.edu.cu</small>
+                                </div>
+                                <span class="badge bg-primary rounded-pill" id="editProfesorNivel">Profesor</span>
+                            </div>
+
+                            <form id="formEditarProfesor">
+                                <input type="hidden" id="editProfesorId">
+
+                                <!-- 1. Carrera -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div class="card-header bg-white border-0 fw-bold text-primary">
+                                        <i class="fas fa-graduation-cap me-2"></i>Asignar Carrera Principal
+                                    </div>
+                                    <div class="card-body">
+                                        <select class="form-select form-select-sm" id="editProfesorCarrera">
+                                            <option value="">Sin carrera asignada</option>
+                                            {% for c in carreras %}
+                                            <option value="{{ c.id }}">{{ c.nombre }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <small class="text-muted">La carrera determina el contexto principal del
+                                            profesor.</small>
+                                    </div>
+                                </div>
+
+                                <!-- 2. Asignaturas (Materias) -->
+                                <div class="card border-0 shadow-sm mb-4">
+                                    <div
+                                        class="card-header bg-white border-0 fw-bold text-primary d-flex justify-content-between align-items-center">
+                                        <span><i class="fas fa-book me-2"></i>Asignar Materias (Asignaturas)</span>
+                                        <select class="form-select form-select-sm w-auto" id="filtroAnioMateria">
+                                            <option value="todos">Todos los años</option>
+                                            <option value="1">1º Año</option>
+                                            <option value="2">2º Año</option>
+                                            <option value="3">3º Año</option>
+                                            <option value="4">4º Año</option>
+                                            <option value="5">5º Año</option>
+                                        </select>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="listaMateriasCheckboxes" class="row g-2"
+                                            style="max-height: 300px; overflow-y: auto;">
+                                            <!-- Checkboxes renderizados por JS -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="text-end pt-3 border-top">
+                                    <button type="submit" class="btn btn-success rounded-pill px-4">
+                                        <i class="fas fa-save me-2"></i>Guardar Cambios
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal Detalles de Asignatura (Estudiantes y Notas) -->
+<div class="modal fade" id="detallesAsignaturaModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-navy">
+                    <i class="fas fa-users me-2"></i>
+                    <span id="detalleAsignaturaTitulo">Detalles de Asignatura</span>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detallesAsignaturaContent">
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="small text-muted mt-2">Cargando estudiantes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{% if user.profesor.nivel == 'jefe de carrera' %}
+{{ all_materias_data|json_script:"ums-materias-data" }}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        try {
+            const scriptTag = document.getElementById('ums-materias-data');
+            if (scriptTag) {
+                window.ALL_MATERIAS = JSON.parse(scriptTag.textContent);
+                console.log("ALL_MATERIAS cargado:", window.ALL_MATERIAS ? window.ALL_MATERIAS.length : 0);
+            } else {
+                console.warn("No data script found for materias");
+                window.ALL_MATERIAS = [];
+            }
+        } catch (e) {
+            console.error("Error parsing materias data:", e);
+            window.ALL_MATERIAS = [];
+        }
+    });
+</script>
+{% endif %}
+<script src="{% static 'js/profesor.js' %}"></script>
+{% endblock %}

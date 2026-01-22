@@ -1,4 +1,3 @@
-
 .login-body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     height: 100vh;
@@ -13,7 +12,7 @@
 .news-section {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px 0 0 20px;
-    box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+    box-shadow: 5px 0 15px rgba(0, 0, 0, 0.1);
     height: 100vh;
     overflow: hidden;
     padding: 2rem;
@@ -28,10 +27,12 @@
     background: white;
     border-radius: 15px;
     padding: 2rem;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     height: 100%;
     display: flex;
     flex-direction: column;
+    border-top: 5px solid #667eea;
+    /* Default color (Aviso) */
 }
 
 .news-badge {
@@ -44,21 +45,70 @@
     margin-bottom: 1rem;
 }
 
-.news-badge.urgent {
-    background: #dc3545;
-}
+/* Eliminar clases antiguas (urgent, info) para evitar confusión */
 
-.news-badge.info {
-    background: #17a2b8;
-}
-
+/* Titulo de la Noticia (Simplificado) */
 .news-title {
     color: #2c3e50;
     font-weight: 700;
     margin-bottom: 1.5rem;
-    border-bottom: 3px solid #667eea;
     padding-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    border: none !important;
+    /* Quitar cualquier raya residual */
 }
+
+/* ==========================================
+   COLORES POR CATEGORÍA (DISEÑO FINAL)
+   ========================================== */
+
+/* EXAMEN - ROJO */
+.news-card.cat-examen,
+.news-card[class*="cat-examen"] {
+    border-top: 8px solid #dc3545 !important;
+}
+
+.cat-examen .news-badge {
+    background: #dc3545 !important;
+}
+
+.cat-examen .news-title {
+    color: #dc3545 !important;
+}
+
+/* EVENTO - CELESTE */
+.news-card.cat-evento,
+.news-card[class*="cat-evento"] {
+    border-top: 8px solid #17a2b8 !important;
+}
+
+.cat-evento .news-badge {
+    background: #17a2b8 !important;
+}
+
+.cat-evento .news-title {
+    color: #17a2b8 !important;
+}
+
+/* AVISO - PÚRPURA (Default) */
+.news-card.cat-aviso,
+.news-card[class*="cat-aviso"] {
+    border-top: 8px solid #667eea !important;
+}
+
+.cat-aviso .news-badge {
+    background: #667eea !important;
+}
+
+.cat-aviso .news-title {
+    color: #667eea !important;
+}
+
+
 
 .news-content {
     flex-grow: 1;
@@ -90,7 +140,7 @@
     border-radius: 15px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .login-logo {
@@ -142,7 +192,7 @@
     .news-section {
         display: none;
     }
-    
+
     .login-section {
         border-radius: 0;
         padding: 1rem;
@@ -156,4 +206,95 @@
 
 .password-toggle:hover {
     color: #667eea;
+}
+
+/* Botón UHO (Iniciar Sesión) */
+.btn-uho {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-uho:hover {
+    background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+    color: white;
+}
+
+.btn-uho:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
+}
+
+/* ========== ESTILOS PARA REGISTRO ========== */
+
+/* Enlace "Registrarse" */
+.registro-link {
+    color: #3498db !important;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: inline-block;
+    padding: 3px 0;
+}
+
+.registro-link:hover {
+    color: #2980b9 !important;
+    transform: translateY(-1px);
+}
+
+/* Modal de registro */
+.modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+    border: none;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+    opacity: 0.8;
+}
+
+.modal-header .btn-close:hover {
+    opacity: 1;
+}
+
+/* Botón verde en modal */
+.btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-success:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+
+/* Visibilidad de controles del carrusel */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    filter: invert(1) brightness(0.5);
+    /* Flechas oscuras para fondo claro */
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 60px;
+    /* Tamaño adecuado para clics */
 }

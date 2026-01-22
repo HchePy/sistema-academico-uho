@@ -25,8 +25,15 @@ SECRET_KEY = 'django-insecure-=%3x^^r=p7pqivk&c*n9@jgynt=rhcb&@7k=h4a#(zc2&0yat7
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # Permitir acceso desde cualquier host local para pruebas
 
+CSRF_TRUSTED_ORIGINS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'https://alva-unbeseeming-nontolerantly.ngrok-free.dev',
+]
+
+AUTH_USER_MODEL = 'login.User'
 
 # Application definition
 
@@ -72,6 +79,8 @@ WSGI_APPLICATION = 'se.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+
 
 DATABASES = {
     'default': {

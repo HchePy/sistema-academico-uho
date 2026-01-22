@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/estudiante.css' %}">
+{% endblock %}
+
+{% block breadcrumb %}Panel de Control / Estudiante{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Header -->
+    <div class="col-12 mb-2">
+        <h2 class="section-title mb-0">Mi Dashboard</h2>
+    </div>
+
+    <!-- Próxima Clase Destacada -->
+    <div class="col-12">
+        <div class="card featured-card shadow p-4 border-0">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="rounded-circle bg-white p-3 shadow-sm d-flex align-items-center justify-content-center"
+                        style="width: 70px; height: 70px;">
+                        <i class="fas fa-clock fs-2 text-primary"></i>
+                    </div>
+                </div>
+                <div class="col">
+                    <span class="badge bg-light text-primary mb-2">{% if tiene_clase_ahora %}Clase Actual{% else
+                        %}Próxima Clase{% endif %}</span>
+                    <h3 class="mb-1">{% if proxima_clase %}{{ proxima_clase.materia.nombre }}{% else %}No hay clases
+                        hoy{% endif %}</h3>
+                    <div class="d-flex align-items-center opacity-75 small">
+                        {% if proxima_clase %}
+                        <i class="fas fa-map-marker-alt me-1"></i>
+                        <span>{{ proxima_clase.aula|default:"Sin aula" }}</span>
+                        <span class="mx-1">•</span>
+                        <span>{{ proxima_clase.hora_inicio|time:"H:i" }}</span>
+                        <span>-</span>
+                        <span>{{ proxima_clase.hora_fin|time:"H:i" }}</span>
+                        {% with prof=proxima_clase.materia.profesores.first %}
+                        {% if prof %}
+                        <span class="mx-2">|</span>
+                        <img src="{{ prof.foto|default:'https://via.placeholder.com/30' }}" class="rounded-circle me-1"
+                            alt="Prof" style="width: 20px; height: 20px; object-fit: cover;">
+                        {{ prof.user.username }}
+                        {% endif %}
+                        {% endwith %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-light text-primary fw-bold rounded-pill px-4 shadow-sm"
+                        data-bs-toggle="modal" data-bs-target="#horarioCompletoModal">
+                        <i class="fas fa-calendar-alt me-1"></i> Ver Horario Completo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notas Recientes con Tendencia -->
+    <div class="col-md-5">
+        <div class="card shadow-sm p-4 h-100 border-0 bg-white">
+            <h4 class="fw-bold mb-4 d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-chart-line me-2 text-primary"></i>Notas Recientes</span>
+                <span class="badge bg-light text-muted fw-normal" style="font-size: 0.7rem;">Este Mes</span>
+            </h4>
+
+            {% if notas %}
+            {% for nota in notas %}
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-dark fw-medium">{{ nota.materia.nombre }}</span>
+                    <div class="d-flex align-items-center">
+                        <span class="fw-bold me-2">{{ nota.valor }}/5</span>
+                        {% if nota.tendencia == 'subio' %}
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">
+                            <i class="fas fa-arrow-up me-1"></i>Subió
+                        </span>
+                        {% elif nota.tendencia == 'bajo' %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                            <i class="fas fa-arrow-down me-1"></i>Bajó
+                        </span>
+                        {% else %}
+                        <span class="badge bg-light text-muted border">Mantuvo</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="progress" style="height: 6px;">
+                    <div class="progress-bar {% if nota.valor >= 4 %}bg-success{% elif nota.valor >= 3 %}bg-warning{% else %}bg-danger{% endif %}"
+                        role="progressbar"
+                        style="--note-progress: {{ nota.porcentaje }}%; width: var(--note-progress);"></div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p class="text-muted text-center py-5">No tienes notas registradas aún.</p>
+            {% endif %}
+
+            <div class="mt-auto pt-4 text-center">
+                <a href="#" class="btn btn-light btn-sm w-100 rounded-pill text-muted">Ver todas mis calificaciones</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Noticias Blog Style -->
+    <div class="col-md-7">
+        <div class="card shadow-sm p-4 h-100 border-0 bg-white">
+            <h4 class="fw-bold mb-4"><i class="fas fa-newspaper me-2 text-primary"></i>Noticias y Avisos</h4>
+            <div class="news-grid">
+                {% if noticias %}
+                {% for noticia in noticias %}
+                <div class="news-card-mini mb-3 p-3 rounded-3 border bg-light-subtle hover-bg transition 
+                            {% if noticia.categoria == 'examen' %}border-start border-danger border-4
+                            {% elif noticia.categoria == 'evento' %}border-start border-info border-4
+                            {% else %}border-start border-primary border-4{% endif %}">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <span class="badge 
+                                {% if noticia.categoria == 'examen' %}bg-danger
+                                {% elif noticia.categoria == 'evento' %}bg-info
+                                {% else %}bg-primary{% endif %} rounded-pill px-3">
+                            {{ noticia.categoria|capfirst }}
+                        </span>
+                        <small class="text-muted">
+                            <i class="far fa-calendar-alt me-1"></i>
+                            <span>{{ noticia.fecha_publicacion|date:"d/m/Y" }}</span>
+                        </small>
+                    </div>
+                    <h6 class="fw-bold mb-1 text-navy">{{ noticia.titulo }}</h6>
+                    <p class="text-muted small mb-2 noticia-contenido" data-noticia-id="{{ noticia.id }}">
+                        <span class="contenido-corto">{{ noticia.contenido|truncatechars:100 }}</span>
+                        <span class="contenido-completo d-none">{{ noticia.contenido }}</span>
+                    </p>
+                    <a href="#" class="text-primary fw-bold small text-decoration-none btn-ver-mas"
+                        data-noticia-id="{{ noticia.id }}">
+                        <span class="texto-ver-mas">Leer más</span> <i class="fas fa-chevron-right ms-1"
+                            style="font-size: 0.7rem;"></i>
+                    </a>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted text-center py-5">No hay noticias relevantes para ti.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Horario Completo -->
+<div class="modal fade" id="horarioCompletoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="fas fa-calendar-week me-2"></i>Mi Horario Completo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                {% if horario_completo %}
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="fas fa-calendar-day me-1"></i>Día</th>
+                                <th><i class="fas fa-clock me-1"></i>Hora Inicio</th>
+                                <th><i class="fas fa-clock me-1"></i>Hora Fin</th>
+                                <th><i class="fas fa-book me-1"></i>Materia</th>
+                                <th><i class="fas fa-door-open me-1"></i>Aula</th>
+                                <th><i class="fas fa-user me-1"></i>Profesor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for horario in horario_completo %}
+                            <tr>
+                                <td><span class="badge bg-light text-dark">{{ horario.dia }}</span></td>
+                                <td>{{ horario.hora_inicio|time:"H:i" }}</td>
+                                <td>{{ horario.hora_fin|time:"H:i" }}</td>
+                                <td><strong>{{ horario.materia.nombre }}</strong></td>
+                                <td>{{ horario.aula|default:"Sin asignar" }}</td>
+                                <td>
+                                    {% with prof=horario.materia.profesores.first %}
+                                    {{ prof.user.username|default:"Sin asignar" }}
+                                    {% endwith %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">No tienes horarios registrados</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Filtro custom para multiplicar (necesario en Django o usar template tags) -->
+<!-- Nota: Esto requiere registrar el filtro. Como hack simple en este prompt, usaré una lógica de estilo inline o similar si es posible, o simplemente asumiré que el backend enviará el % calculado. -->
+
+{% block extra_js %}
+<script src="{% static 'js/estudiante.js' %}"></script>
+{% endblock %}
