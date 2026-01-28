@@ -43,8 +43,8 @@ class Materia (models.Model):
     nombre = models.CharField(max_length=100)
     carrera = models.ForeignKey('login.Carrera', on_delete=models.CASCADE)
 
-    año = models.IntegerField(default=1)  # Año en que se imparte (1-5)
-    progreso_temario = models.IntegerField(default=0) # 0-100%
+    año = models.IntegerField(default=1)
+    progreso_temario = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.nombre}"
@@ -76,7 +76,7 @@ class Noticia(models.Model):
     categoria = models.CharField(max_length=20, choices=[('examen', 'Examen'), ('evento', 'Evento'), ('aviso', 'Aviso')], default='aviso')
     visible_para = models.CharField(max_length=20, choices=[('estudiantes', 'Estudiantes'), ('profesores', 'Profesores'), ('todos', 'Todos')])
     carrera =  models.ForeignKey('login.Carrera', on_delete=models.CASCADE, null=True, blank=True)
-    anio = models.IntegerField(null=True, blank=True) # Para segmentar estudiantes (1º, 2º, etc.)
+    anio = models.IntegerField(null=True, blank=True)
     autor = models.ForeignKey('login.Profesor', on_delete=models.CASCADE, null=True, blank=True, related_name='noticias_publicadas')
 
     def __str__(self):

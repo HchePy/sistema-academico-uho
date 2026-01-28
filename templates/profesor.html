@@ -18,7 +18,7 @@
         </div>
         <div class="text-end">
             <span class="badge bg-white text-dark shadow-sm py-2 px-3 rounded-pill border">
-                <i class="fas fa-calendar-day me-2 text-primary"></i>Semestre Actual: 2024-2
+                <i class="fas fa-calendar-day me-2 text-primary"></i>Semestre Actual: 2024-2025
             </span>
         </div>
     </div>
@@ -115,8 +115,10 @@
                             <td style="min-width: 150px;">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="progress flex-grow-1" style="height: 6px;">
-                                        <div class="progress-bar bg-primary rounded-pill"
-                                            style="width: {{ materia.progreso_temario }}%"></div>
+                                        <div class="progress-bar bg-primary rounded-pill" role="progressbar"
+                                            aria-valuenow="{{ materia.progreso_temario|default:0 }}" aria-valuemin="0"
+                                            aria-valuemax="100" data-width="{{ materia.progreso_temario|default:0 }}">
+                                        </div>
                                     </div>
                                     <small class="text-muted fw-bold">{{ materia.progreso_temario }}%</small>
                                 </div>
@@ -124,7 +126,7 @@
                             <td class="text-end pe-4">
                                 <button class="btn btn-sm btn-light rounded-pill px-3 shadow-sm text-primary fw-bold"
                                     data-materia-id="{{ materia.id }}" data-materia-nombre="{{ materia.nombre }}"
-                                    onclick="verDetallesAsignatura({{ materia.id }}, '{{ materia.nombre }}')">Ver
+                                    onclick="verDetallesAsignatura('{{ materia.id }}', '{{ materia.nombre }}')">Ver
                                     Detalles</button>
                             </td>
                         </tr>
@@ -152,62 +154,40 @@
             </div>
             <div class="modal-body">
                 <div id="subirNotasAlerta"></div>
-                <form id="formSubirNotas">
+                <form method="POST" action="{% url 'subir_notas' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Seleccionar archivo Excel (.xlsx)</label>
-                        <input type="file" class="form-control rounded-3" id="archivo" name="archivo"
-                            accept=".xlsx,.xls" required>
-                        <small class="text-muted d-block mt-2"><i class="fas fa-info-circle"></i> Solo se aceptan
-                            archivos Excel (.xlsx o .xls)</small>
+                        <label class="form-label small fw-bold">Archivo Excel de Notas</label>
+                        {{ subir_notas_form.archivo }}
+                        <div class="form-text small text-muted">Asegúrate de que las columnas coincidan con el formato
+                            requerido.</div>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Carrera</label>
-                            <select class="form-select form-select-sm rounded-3" id="carrera_id" name="carrera_id"
-                                required onchange="cargarMateriasPorCarrera()">
-                                <option value="" selected disabled>Seleccionar carrera...</option>
-                                {% for c in carreras %}
-                                <option value="{{ c.id }}">{{ c.nombre }}</option>
-                                {% endfor %}
-                            </select>
+                            {{ subir_notas_form.carrera }}
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label small fw-bold">Año Académico</label>
-                            <select class="form-select form-select-sm rounded-3" id="anio" name="anio" required
-                                onchange="cargarMateriasPorCarrera()">
-                                <option value="" selected disabled>Seleccionar año...</option>
-                                <option value="1">1º Año</option>
-                                <option value="2">2º Año</option>
-                                <option value="3">3º Año</option>
-                                <option value="4">4º Año</option>
-                                <option value="5">5º Año</option>
-                            </select>
+                            <label class="form-label small fw-bold">Año</label>
+                            {{ subir_notas_form.anio }}
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold">Materia</label>
-                            <select class="form-select form-select-sm rounded-3" id="materia_id" name="materia_id"
-                                required>
-                                <option value="" selected disabled>Primero seleccione carrera y año...</option>
-                            </select>
+                            {{ subir_notas_form.materia }}
                         </div>
                     </div>
+
                     <div class="alert alert-info rounded-3 small" role="alert">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        <strong>Formato del archivo Excel (muy simple):</strong>
+                        <i class="fas fa-lightbulb me-2"></i><strong>Formato Excel:</strong>
                         <ul class="mb-0 mt-2 small">
-                            <li><strong>Columna A:</strong> Nombre del estudiante (ej: Juan, María)</li>
+                            <li><strong>Columna A:</strong> Nombre Estudiante</li>
                             <li><strong>Columna B:</strong> Nota (0-5)</li>
                         </ul>
-                        <small class="text-muted d-block mt-2">
-                            <i class="fas fa-info-circle me-1"></i>
-                            La primera fila debe contener los encabezados. El sistema ignora tildes y mayúsculas.
-                        </small>
                     </div>
                     <div class="text-end">
                         <button type="button" class="btn btn-secondary rounded-pill px-4"
                             data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-success rounded-pill px-4 ms-2">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 ms-2">
                             <i class="fas fa-upload me-2"></i>Subir Notas
                         </button>
                     </div>
@@ -241,86 +221,107 @@
                 <div class="tab-content" id="newsTabsContent">
                     <!-- PANEL PUBLICAR -->
                     <div class="tab-pane fade show active" id="publicar-panel" role="tabpanel">
-                        <form id="formNuevaNoticia" class="px-2">
+                        <form method="POST" action="{% url 'crear_noticia' %}" class="px-2" id="formNoticia"
+                            data-create-url="{% url 'crear_noticia' %}">
+                            {% csrf_token %}
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Título</label>
-                                <input type="text" class="form-control rounded-3" id="noticia_titulo" required
-                                    placeholder="Ej: Cambio en Fecha de Examen">
+                                {{ noticia_form.titulo }}
                             </div>
                             <div class="mb-3">
                                 <label class="form-label small fw-bold">Contenido</label>
-                                <textarea class="form-control rounded-3" id="noticia_contenido" rows="4" required
-                                    placeholder="Escribe el mensaje para tus estudiantes..."></textarea>
+                                {{ noticia_form.contenido }}
                             </div>
                             <!-- Público Objetivo -->
                             <div class="row g-3 mb-3">
                                 <div class="col-md-4">
                                     <label class="form-label small fw-bold">Dirigido a:</label>
-                                    <select class="form-select form-select-sm rounded-3" id="noticia_visible_para"
-                                        onchange="toggleSegmentacion()">
-                                        <option value="estudiantes">Estudiantes</option>
-                                        <option value="profesores">Profesores</option>
-                                        <option value="todos">Público General (Todos)</option>
-                                    </select>
+                                    {{ noticia_form.visible_para }}
                                 </div>
                                 <div class="col-md-4 segmentation-field" id="div_carrera">
                                     <label class="form-label small fw-bold">Carrera:</label>
-                                    <select class="form-select form-select-sm rounded-3" id="noticia_carrera">
-                                        <option value="">Todas las Carreras</option>
-                                        {% for c in carreras %}
-                                        <option value="{{ c.id }}">{{ c.nombre }}</option>
-                                        {% endfor %}
-                                    </select>
+                                    {{ noticia_form.carrera }}
                                 </div>
                                 <div class="col-md-4 segmentation-field" id="div_año">
                                     <label class="form-label small fw-bold">Año:</label>
-                                    <select class="form-select form-select-sm rounded-3" id="noticia_año">
-                                        <option value="">Todos los Años</option>
-                                        <option value="1">1º Año</option>
-                                        <option value="2">2º Año</option>
-                                        <option value="3">3º Año</option>
-                                        <option value="4">4º Año</option>
-                                        <option value="5">5º Año</option>
-                                    </select>
+                                    {{ noticia_form.anio }}
                                 </div>
                             </div>
 
                             <!-- Categoría -->
                             <div class="mb-4">
                                 <label class="form-label small fw-bold d-block mb-2">Categoría del Aviso:</label>
-                                <div class="d-flex gap-3">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="noticia_categoria"
-                                            id="cat_aviso" value="aviso" checked>
-                                        <label class="form-check-label small" for="cat_aviso">Aviso</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="noticia_categoria"
-                                            id="cat_examen" value="examen">
-                                        <label class="form-check-label small" for="cat_examen">Examen</label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="noticia_categoria"
-                                            id="cat_evento" value="evento">
-                                        <label class="form-check-label small" for="cat_evento">Evento</label>
-                                    </div>
-                                </div>
+                                {{ noticia_form.categoria }}
                             </div>
-                            <div class="text-end">
-                                <button type="submit" id="btnPublicar" class="btn btn-primary rounded-pill px-5 py-2">
-                                    <i class="fas fa-paper-plane me-2"></i>Publicar Ahora</button>
+                            <!-- Botones -->
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" id="btnCancelarEdicion"
+                                    class="btn btn-secondary rounded-pill px-4 py-2 d-none" onclick="cancelarEdicion()">
+                                    Cancelar
+                                </button>
+                                <button type="submit" id="btnSubmitNoticia"
+                                    class="btn btn-primary rounded-pill px-5 py-2">
+                                    <i class="fas fa-paper-plane me-2"></i>Publicar Ahora
+                                </button>
                             </div>
                         </form>
                     </div>
 
                     <!-- PANEL VER -->
                     <div class="tab-pane fade px-2" id="ver-panel" role="tabpanel">
-                        <div id="listaNoticias" class="list-group list-group-flush rounded-3 overflow-hidden border">
-                            <!-- Aquí se cargan las noticias -->
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status"></div>
-                                <p class="small text-muted mt-2">Cargando noticias...</p>
+                        <div class="list-group list-group-flush rounded-3 overflow-hidden border">
+                            {% for n in mis_noticias %}
+                            <div class="list-group-item p-3 border-bottom">
+                                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                    <h6 class="mb-0 fw-bold text-navy">{{ n.titulo }}</h6>
+                                    <small class="text-muted">{{ n.fecha_publicacion|date:"d/m/Y H:i" }}</small>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary-subtle text-secondary rounded-pill small me-2">
+                                        {% if n.categoria == 'aviso' %}Aviso
+                                        {% elif n.categoria == 'evento' %}Evento
+                                        {% elif n.categoria == 'examen' %}Examen
+                                        {% else %}General
+                                        {% endif %}
+                                    </span>
+
+                                    {% if n.visible_para == 'todos' %}
+                                    <span class="badge bg-info-subtle text-info rounded-pill small">Público</span>
+                                    {% elif n.visible_para == 'profesores' %}
+                                    <span
+                                        class="badge bg-warning-subtle text-dark border rounded-pill small">Profesores</span>
+                                    {% elif n.visible_para == 'estudiantes' %}
+                                    <span class="badge bg-light text-dark border rounded-pill small">Estudiantes</span>
+                                    {% else %}
+                                    <span class="badge bg-light text-dark border rounded-pill small">Privado</span>
+                                    {% endif %}
+                                </div>
+                                <p class="mb-2 text-muted small">{{ n.contenido|truncatechars:100 }}</p>
+                                <div class="text-end">
+                                    <button type="button" class="btn btn-sm btn-outline-primary border-0 me-1"
+                                        data-id="{{ n.id }}" data-titulo="{{ n.titulo }}"
+                                        data-contenido="{{ n.contenido }}" data-visible="{{ n.visible_para }}"
+                                        data-categoria="{{ n.categoria }}"
+                                        data-carrera="{{ n.carrera_id|default_if_none:'' }}"
+                                        data-anio="{{ n.anio|default_if_none:'' }}"
+                                        onclick="prepararEdicion(this.dataset.id, this.dataset.titulo, this.dataset.contenido, this.dataset.visible, this.dataset.categoria, this.dataset.carrera, this.dataset.anio)">
+                                        <i class="fas fa-edit me-1"></i>Editar
+                                    </button>
+                                    <form method="POST" action="{% url 'borrar_noticia' n.id %}" class="d-inline"
+                                        onsubmit="return confirm('¿Eliminar esta noticia?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-outline-danger border-0">
+                                            <i class="fas fa-trash-alt me-1"></i>Eliminar
+                                        </button>
+                                    </form>
+                                </div>
                             </div>
+                            {% empty %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-newspaper fa-2x text-muted mb-3 opacity-50"></i>
+                                <p class="small text-muted mb-0">No has publicado noticias aún.</p>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                 </div>
@@ -339,41 +340,26 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form id="formSubirHorarios">
+                <form method="POST" action="{% url 'subir_horarios' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label small fw-bold">Archivo Excel (.xlsx)</label>
-                        <input type="file" class="form-control rounded-3" id="archivo_horario" name="archivo"
-                            accept=".xlsx,.xls" required>
-                        <small class="text-muted d-block mt-2"><i class="fas fa-info-circle"></i> Solo archivos
-                            Excel</small>
+                        <label class="form-label small fw-bold">Archivo de Horarios</label>
+                        {{ subir_horarios_form.archivo }}
+                        <div class="form-text small text-muted">Excel con horarios completos de la carrera/año.</div>
                     </div>
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Carrera</label>
-                            <select class="form-select rounded-3" id="carrera_id_horario" name="carrera_id" required>
-                                <option value="" selected disabled>Seleccionar...</option>
-                                {% for c in carreras %}
-                                <option value="{{ c.id }}">{{ c.nombre }}</option>
-                                {% endfor %}
-                            </select>
+                            {{ subir_horarios_form.carrera }}
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-bold">Año</label>
-                            <select class="form-select rounded-3" id="anio_horario" name="anio" required>
-                                <option value="" selected disabled>Seleccionar...</option>
-                                <option value="1">1º Año</option>
-                                <option value="2">2º Año</option>
-                                <option value="3">3º Año</option>
-                                <option value="4">4º Año</option>
-                                <option value="5">5º Año</option>
-                            </select>
+                            {{ subir_horarios_form.anio }}
                         </div>
                     </div>
                     <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="reemplazar_horarios" name="reemplazar"
-                            value="true">
-                        <label class="form-check-label small" for="reemplazar_horarios">
+                        {{ subir_horarios_form.reemplazar }}
+                        <label class="form-check-label small" for="{{ subir_horarios_form.reemplazar.id_for_label }}">
                             Reemplazar horarios existentes
                         </label>
                     </div>
@@ -433,8 +419,10 @@
                                     <p class="mb-1 small text-secondary">{{ p.carrera_nombre }}</p>
 
                                     {% if p.materias_count > 0 %}
-                                    <small class="d-block text-muted mt-1"><i class="fas fa-book me-1"></i>{{
-                                        p.materias_count }} materias</small>
+                                    <small class="d-block text-muted mt-1">
+                                        <i class="fas fa-book me-1"></i>
+                                        {{ p.materias_count|add:"0" }} materias
+                                    </small>
                                     {% else %}
                                     <small class="d-block text-warning mt-1"><i
                                             class="fas fa-exclamation-triangle me-1"></i>Sin asignaciones</small>
@@ -552,23 +540,6 @@
 {% block extra_js %}
 {% if user.profesor.nivel == 'jefe de carrera' %}
 {{ all_materias_data|json_script:"ums-materias-data" }}
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        try {
-            const scriptTag = document.getElementById('ums-materias-data');
-            if (scriptTag) {
-                window.ALL_MATERIAS = JSON.parse(scriptTag.textContent);
-                console.log("ALL_MATERIAS cargado:", window.ALL_MATERIAS ? window.ALL_MATERIAS.length : 0);
-            } else {
-                console.warn("No data script found for materias");
-                window.ALL_MATERIAS = [];
-            }
-        } catch (e) {
-            console.error("Error parsing materias data:", e);
-            window.ALL_MATERIAS = [];
-        }
-    });
-</script>
 {% endif %}
 <script src="{% static 'js/profesor.js' %}"></script>
 {% endblock %}

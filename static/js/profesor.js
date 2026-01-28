@@ -1,163 +1,8 @@
-/* JavaScript para el Dashboard del Profesor */
-
-
-// Helper para Notificaciones Toast
-function showNotification(title, message, type = 'success') {
-    const toastEl = document.getElementById('notificationToast');
-    const toastTitle = document.getElementById('toastTitle');
-    const toastMessage = document.getElementById('toastMessage');
-    const toastIcon = document.getElementById('toastIcon');
-
-    if (!toastEl) {
-        // Fallback si no existe el toast en el DOM
-        alert(`${title}: ${message}`);
-        return;
-    }
-
-    toastTitle.textContent = title;
-    toastMessage.textContent = message;
-
-    // Reset classes
-    toastIcon.className = 'me-2 fas';
-
-    if (type === 'success') {
-        toastIcon.classList.add('fa-check-circle', 'text-success');
-    } else if (type === 'error') {
-        toastIcon.classList.add('fa-exclamation-circle', 'text-danger');
-    } else {
-        toastIcon.classList.add('fa-info-circle', 'text-primary');
-    }
-
-    const toast = new bootstrap.Toast(toastEl);
-    toast.show();
-}
-
-// =========================================================
-// MÓDULO PUBLICACIONES (NOTICIAS)
-// =========================================================
-function cargarMisNoticias() {
-    const container = document.getElementById('listaNoticias');
-    if (!container) return;
-
-    container.innerHTML = `
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary mb-2" role="status"></div>
-            <p class="small text-muted">Consultando al servidor...</p>
-        </div>`;
-
-    fetch('/api/noticias/mias/')
-        .then(res => {
-            if (!res.ok) throw new Error('Error ' + res.status);
-            return res.json();
-        })
-        .then(data => {
-            container.innerHTML = '';
-
-            // Header con refresh
-            const header = document.createElement('div');
-            header.className = 'bg-light p-2 text-end border-bottom';
-            header.innerHTML = `<button class="btn btn-sm btn-link text-decoration-none" id="btnRefrescar"><i class="fas fa-sync-alt me-1"></i>Actualizar</button>`;
-            container.appendChild(header);
-            header.querySelector('#btnRefrescar').onclick = cargarMisNoticias;
-
-            if (!data.noticias || data.noticias.length === 0) {
-                container.innerHTML += '<div class="text-center py-5 text-muted"><p>No has publicado noticias todavía.</p></div>';
-                return;
-            }
-
-            data.noticias.forEach(n => {
-                const badgeClass = n.categoria === 'examen' ? 'bg-danger' : (n.categoria === 'evento' ? 'bg-info' : 'bg-primary');
-                const badgeText = n.categoria.charAt(0).toUpperCase() + n.categoria.slice(1);
-
-                const item = document.createElement('div');
-                item.className = 'list-group-item p-3';
-                item.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <span class="badge ${badgeClass} rounded-pill small" style="font-size: 0.65rem;">${badgeText}</span>
-                                <h6 class="mb-0 fw-bold text-navy">${n.titulo}</h6>
-                            </div>
-                            <p class="mb-1 small text-secondary">${n.contenido}</p>
-                            <small class="text-muted"><i class="far fa-clock me-1"></i>${n.fecha}</small>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-primary border-0" onclick="editarNoticia(${n.id})">
-                                <i class="fas fa-pencil-alt"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger border-0" onclick="borrarNoticia(${n.id})">
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                        </div>
-                    </div>`;
-                container.appendChild(item);
-            });
-        })
-        .catch(err => {
-            container.innerHTML = `<div class="alert alert-danger m-3 small">Error al cargar noticias.<br><button class="btn btn-sm btn-danger mt-2" onclick="cargarMisNoticias()">Reintentar</button></div>`;
-        });
-}
-
-function editarNoticia(id) {
-    fetch('/api/noticias/mias/')
-        .then(res => res.json())
-        .then(data => {
-            const noticia = data.noticias.find(n => n.id === id);
-            if (!noticia) return;
-
-            document.getElementById('noticia_titulo').value = noticia.titulo;
-            document.getElementById('noticia_contenido').value = noticia.contenido;
-
-            toggleSegmentacion();
-            const btnPublicar = document.getElementById('btnPublicar');
-            btnPublicar.dataset.editingId = id;
-            btnPublicar.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Cambios';
-
-            document.getElementById('publicar-tab').click();
-            new bootstrap.Modal(document.getElementById('noticiaModal')).show();
-        });
-}
-
-let confirmModalInstance = null;
-function borrarNoticia(id) {
-    if (!confirmModalInstance) {
-        const modalEl = document.getElementById('confirmModal');
-        if (modalEl) confirmModalInstance = new bootstrap.Modal(modalEl);
-    }
-
-    if (confirmModalInstance) {
-        const confirmBtn = document.getElementById('confirmActionBtn');
-        const newConfirmBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-
-        document.getElementById('confirmTitle').textContent = '¿Eliminar noticia?';
-        document.getElementById('confirmMessage').textContent = 'Esta acción eliminará el aviso de forma permanente.';
-
-        newConfirmBtn.onclick = () => {
-            confirmModalInstance.hide();
-            doDelete(id);
-        };
-        confirmModalInstance.show();
-    } else {
-        if (confirm("¿Eliminar noticia permanentemente?")) doDelete(id);
-    }
-}
-
-function doDelete(id) {
-    fetch('/api/noticias/borrar/' + id + '/', { method: 'POST' })
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                showNotification("Noticia", "Noticia eliminada correctamente", "success");
-                cargarMisNoticias();
-            } else {
-                showNotification("Error", data.error, "error");
-            }
-        });
-}
-
 function toggleSegmentacion() {
-    const publico = document.getElementById('noticia_visible_para').value;
+    const publicoField = document.getElementById('id_visible_para');
+    if (!publicoField) return;
+
+    const publico = publicoField.value;
     const divCarrera = document.getElementById('div_carrera');
     const divAnio = document.getElementById('div_año');
 
@@ -172,6 +17,15 @@ function toggleSegmentacion() {
         divAnio?.classList.remove('d-none');
     }
 }
+
+// Inicializar listener para segmentación
+document.addEventListener('DOMContentLoaded', function () {
+    const publicoField = document.getElementById('id_visible_para');
+    if (publicoField) {
+        publicoField.addEventListener('change', toggleSegmentacion);
+        toggleSegmentacion(); // Inicializar estado
+    }
+});
 
 // =========================================================
 // MÓDULO JEFE DE CARRERA
@@ -360,118 +214,15 @@ document.addEventListener('DOMContentLoaded', () => {
         publicoSelect.addEventListener('change', toggleSegmentacion);
     }
 
-    const verTab = document.getElementById('ver-tab');
-    if (verTab) {
-        verTab.addEventListener('shown.bs.tab', () => cargarMisNoticias());
-    }
+
 
     // Formulario Noticias
-    const formNoticia = document.getElementById('formNuevaNoticia');
-    if (formNoticia) {
-        formNoticia.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnPublicar');
-            const data = {
-                titulo: document.getElementById('noticia_titulo').value,
-                contenido: document.getElementById('noticia_contenido').value,
-                visible_para: document.getElementById('noticia_visible_para').value,
-                categoria: document.querySelector('input[name="noticia_categoria"]:checked').value,
-                carrera_id: document.getElementById('noticia_carrera').value || null,
-                año: document.getElementById('noticia_año').value || null
-            };
+    // El formulario de noticias ahora usa Django Forms (POST estándar).
+    // Se ha eliminado el listener antiguo "formNuevaNoticia".
 
-            const endpoint = btn.dataset.editingId ? `/api/noticias/editar/${btn.dataset.editingId}/` : '/api/noticias/crear/';
+    // Formularios Subir Notas y Horarios ahora usan Django Forms estándar (POST)
+    // Se eliminó la lógica AJAX manual.
 
-            btn.innerHTML = 'Enviando...';
-            btn.disabled = true;
-
-            fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(r => r.json()).then(d => {
-                btn.disabled = false;
-                btn.innerHTML = 'Publicar';
-                if (d.success) {
-                    formNoticia.reset();
-                    delete btn.dataset.editingId;
-                    cargarMisNoticias();
-                    showNotification("Éxito", "Noticia guardada correctamente", "success");
-                } else {
-                    showNotification("Error", d.error, "error");
-                }
-            });
-        });
-    }
-
-    // Formulario Subir Notas
-    const formNotas = document.getElementById('formSubirNotas');
-    if (formNotas) {
-        formNotas.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            // Usar fetch para enviar archivo
-            const btn = formNotas.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Subiendo...';
-            btn.disabled = true;
-
-            fetch('/subir-notas/', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(d => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    if (d.exito) {
-                        showNotification("Éxito", d.exito, "success");
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('subirNotasModal'));
-                        modal.hide();
-                    }
-                    else showNotification("Error", d.error || "Falló la subida", "error");
-                })
-                .catch(e => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    showNotification("Error de Red", e.message, "error");
-                });
-        });
-    }
-
-    // Formulario Subir Horarios
-    const formHorarios = document.getElementById('formSubirHorarios');
-    if (formHorarios) {
-        formHorarios.addEventListener('submit', function (e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const btn = formHorarios.querySelector('button[type="submit"]');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = 'Subiendo...';
-            btn.disabled = true;
-
-            fetch('/subir-horarios/', { method: 'POST', body: formData })
-                .then(r => r.json())
-                .then(d => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    if (d.exito) {
-                        let mensaje = d.exito;
-                        // Si hay errores, agregarlos al mensaje
-                        if (d.detalles && d.detalles.errores && d.detalles.errores.length > 0) {
-                            mensaje += '\n\nErrores encontrados:\n' + d.detalles.errores.join('\n');
-                        }
-                        showNotification("Éxito", mensaje, "success");
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('subirHorariosModal'));
-                        modal.hide();
-                        formHorarios.reset();
-                    }
-                    else showNotification("Error", d.error || "Falló la subida", "error");
-                })
-                .catch(e => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    showNotification("Error de Red", e.message, "error");
-                });
-        });
-    }
 
     // Formulario Asignar Profesores (JEFE)
     const formEditarProf = document.getElementById('formEditarProfesor');
@@ -489,7 +240,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             fetch('/api/profesores/asignar/', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
                 body: JSON.stringify({
                     profesor_id: profesorId,
                     carrera_id: carreraId || null,
@@ -508,16 +262,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 btn.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Cambios';
                 btn.disabled = false;
                 if (d.success) {
-                    showNotification("Guardado", "Asignaciones actualizadas con éxito", "success");
+                    showToast("success", "Guardado", "Asignaciones actualizadas con éxito");
                     // Opcional: recargar para ver cambios en la lista ppal
                     setTimeout(() => location.reload(), 1500);
                 } else {
-                    showNotification("Error", d.error, "error");
+                    showToast("error", "Error", d.error);
                 }
             }).catch(err => {
                 btn.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Cambios';
                 btn.disabled = false;
-                showNotification("Error", err.message, "error");
+                showToast("error", "Error", err.message);
             });
         });
     }
@@ -530,27 +284,140 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = '';
         }
     });
+
+    // Fix: Aplicar anchos de barras de progreso dinámicamente para evitar errores de linter CSS en HTML
+    document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
+        bar.style.width = bar.dataset.width + '%';
+    });
 });
 
-// Función global para materia select
-function cargarMateriasPorCarrera() {
-    const carreraId = document.getElementById('carrera_id')?.value;
-    const anio = document.getElementById('anio')?.value;
-    const select = document.getElementById('materia_id');
-    if (!select || !carreraId || !anio) return;
+// Función para cargar materias en el formulario de notas
+function initMateriasNotas() {
+    const carreraSel = document.getElementById('notas_carrera');
+    const anioSel = document.getElementById('notas_anio');
+    const materiaSel = document.getElementById('notas_materia');
 
-    select.innerHTML = '<option>Cargando...</option>';
-    fetch(`/api/materias/?carrera_id=${carreraId}&anio=${anio}`)
-        .then(r => r.json()).then(d => {
-            select.innerHTML = '';
-            if (d.materias && d.materias.length > 0) {
-                d.materias.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.id; opt.textContent = m.nombre;
-                    select.appendChild(opt);
-                });
-            } else {
-                select.innerHTML = '<option value="" disabled>No hay materias</option>';
-            }
-        });
+    if (!carreraSel || !anioSel || !materiaSel) return;
+
+    function load() {
+        const carreraId = carreraSel.value;
+        const anio = anioSel.value;
+
+        materiaSel.innerHTML = '<option>Cargando...</option>';
+
+        if (!carreraId || !anio) {
+            materiaSel.innerHTML = '<option value="" disabled selected>Seleccione carrera y año...</option>';
+            return;
+        }
+
+        fetch(`/api/materias/?carrera_id=${carreraId}&anio=${anio}`)
+            .then(r => r.json())
+            .then(d => {
+                materiaSel.innerHTML = '';
+                if (d.materias && d.materias.length > 0) {
+                    d.materias.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m.id;
+                        opt.textContent = m.nombre;
+                        materiaSel.appendChild(opt);
+                    });
+                } else {
+                    materiaSel.innerHTML = '<option value="" disabled>No hay materias</option>';
+                }
+            })
+            .catch(() => {
+                materiaSel.innerHTML = '<option value="" disabled>Error al cargar</option>';
+            });
+    }
+
+    carreraSel.addEventListener('change', load);
+    anioSel.addEventListener('change', load);
 }
+
+document.addEventListener('DOMContentLoaded', initMateriasNotas);
+
+// =========================================================
+// FUNCIONES MIGRADAS DE HTML (Inline Scripts)
+// =========================================================
+
+// Cargar datos de materias al inicio (para Jefe de Carrera)
+function initMateriasData() {
+    try {
+        const scriptTag = document.getElementById('ums-materias-data');
+        if (scriptTag) {
+            window.ALL_MATERIAS = JSON.parse(scriptTag.textContent);
+            console.log("ALL_MATERIAS cargado:", window.ALL_MATERIAS ? window.ALL_MATERIAS.length : 0);
+        } else {
+            // Solo warn si se esperaba (ej: es jefe de carrera) pero no rompe si no lo es.
+            // window.ALL_MATERIAS = []; 
+        }
+    } catch (e) {
+        console.error("Error parsing materias data:", e);
+        window.ALL_MATERIAS = [];
+    }
+}
+
+// Preparar formulario para Editar Noticia
+// Se expone globalmente porque se llama desde onclick en HTML
+window.prepararEdicion = function (id, titulo, contenido, visiblePara, categoria, carreraId, anio) {
+    // Switch tab
+    const tabPublicarEl = document.querySelector('#publicar-tab');
+    if (tabPublicarEl) {
+        const tabPublicar = new bootstrap.Tab(tabPublicarEl);
+        tabPublicar.show();
+    }
+
+    // Fill form
+    const form = document.getElementById('formNoticia');
+    if (!form) return;
+
+    form.action = `/noticias/editar/${id}/`;
+
+    if (document.getElementById('id_titulo')) document.getElementById('id_titulo').value = titulo;
+    if (document.getElementById('id_contenido')) document.getElementById('id_contenido').value = contenido;
+    if (document.getElementById('id_visible_para')) document.getElementById('id_visible_para').value = visiblePara;
+    if (document.getElementById('id_categoria')) document.getElementById('id_categoria').value = categoria;
+
+    const carField = document.getElementById('id_carrera');
+    const anioField = document.getElementById('id_anio');
+    if (carField && carreraId) carField.value = carreraId;
+    if (anioField && anio) anioField.value = anio;
+
+    // UI Change
+    const btnSubmit = document.getElementById('btnSubmitNoticia');
+    if (btnSubmit) btnSubmit.innerHTML = '<i class="fas fa-save me-2"></i>Guardar Cambios';
+
+    const btnCancel = document.getElementById('btnCancelarEdicion');
+    if (btnCancel) btnCancel.classList.remove('d-none');
+
+    // Trigger generic change event for visibility logic (if any)
+    const visField = document.getElementById('id_visible_para');
+    if (visField) visField.dispatchEvent(new Event('change'));
+};
+
+// Cancelar Edición Noticia
+window.cancelarEdicion = function () {
+    const form = document.getElementById('formNoticia');
+    if (!form) return;
+
+    // Reset action to "Create" 
+    // Usamos el data-attribute para obtener la URL limpia
+    const createUrl = form.dataset.createUrl || '/noticias/crear/';
+    form.action = createUrl;
+
+    form.reset();
+
+    const btnSubmit = document.getElementById('btnSubmitNoticia');
+    if (btnSubmit) btnSubmit.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Publicar Ahora';
+
+    const btnCancel = document.getElementById('btnCancelarEdicion');
+    if (btnCancel) btnCancel.classList.add('d-none');
+
+    const visField = document.getElementById('id_visible_para');
+    if (visField) visField.dispatchEvent(new Event('change'));
+};
+
+// Inicialización extra
+document.addEventListener('DOMContentLoaded', () => {
+    initMateriasData();
+});

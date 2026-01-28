@@ -1,53 +1,6 @@
 // JavaScript para Login y Registro
 
-// Función para mostrar notificaciones (toasts)
-function showToast(type, title, message) {
-    try {
-        const toastElement = document.getElementById('notificationToast');
-        if (!toastElement) {
-            console.warn('Toast element not found, using alert');
-            alert(`${title}: ${message}`);
-            return;
-        }
-        
-        const toastIcon = document.getElementById('toastIcon');
-        const toastTitle = document.getElementById('toastTitle');
-        const toastMessage = document.getElementById('toastMessage');
-
-        // Establecer clase según tipo
-        toastElement.className = 'toast';
-        if (type === 'success') {
-            toastElement.classList.add('bg-success', 'text-white');
-            if (toastIcon) toastIcon.className = 'fas fa-check-circle text-white';
-        } else if (type === 'error') {
-            toastElement.classList.add('bg-danger', 'text-white');
-            if (toastIcon) toastIcon.className = 'fas fa-exclamation-circle text-white';
-        } else if (type === 'warning') {
-            toastElement.classList.add('bg-warning', 'text-dark');
-            if (toastIcon) toastIcon.className = 'fas fa-exclamation-triangle text-dark';
-        } else {
-            toastElement.classList.add('bg-info', 'text-white');
-            if (toastIcon) toastIcon.className = 'fas fa-info-circle text-white';
-        }
-
-        if (toastTitle) toastTitle.textContent = title;
-        if (toastMessage) toastMessage.textContent = message;
-
-        if (typeof bootstrap !== 'undefined' && bootstrap.Toast) {
-            const toast = new bootstrap.Toast(toastElement);
-            toast.show();
-        } else {
-            console.warn('Bootstrap not loaded, using alert');
-            alert(`${title}: ${message}`);
-        }
-    } catch (e) {
-        console.error('Error showing toast:', e);
-        alert(`${title}: ${message}`);
-    }
-}
-
 function togglePassword(inputId, btn) {
-    // btn: el elemento <button> (se pasa con 'this'); inputId: id del input (opcional)
     btn = btn || (typeof event !== 'undefined' && event.currentTarget);
     const input = inputId ? document.getElementById(inputId)
         : (btn && (btn.previousElementSibling || btn.closest('.input-group').querySelector('input')));
@@ -152,42 +105,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Enviar form
-    const loginForm = document.getElementById('loginForm');
-    if (loginForm) {
-        loginForm.addEventListener('submit', function (e) {
-            e.preventDefault();
 
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
-
-            if (username && password) {
-                // Enviar login al backend
-                fetch('/api/login/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password,
-                        remember: remember
-                    })
-                })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.authenticated) {
-                            window.location.href = '/base/';
-                        } else {
-                            showToast('error', 'Error', 'Usuario o contraseña incorrectos');
-                        }
-                    })
-                    .catch(err => {
-                        console.error('Error:', err);
-                        showToast('error', 'Error', 'Error al iniciar sesión');
-                    });
-            } else {
-                showToast('error', 'Error', 'Por favor complete todos los campos');
-            }
-        });
+    // Auto-show modal if requested by backend
+    if (document.body.dataset.showRegisterModal === "true") {
+        var modalEl = document.getElementById('registroModal');
+        if (modalEl) {
+            var modal = new bootstrap.Modal(modalEl);
+            modal.show();
+        }
     }
+
+
 });
 

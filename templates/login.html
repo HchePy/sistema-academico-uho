@@ -16,253 +16,251 @@
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 
-<body class="login-body">
-<!-- Contenedor de Toasts (Notificaciones) -->
-<div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
-    <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-header">
-            <i id="toastIcon" class="me-2"></i>
-            <strong id="toastTitle" class="me-auto">Notificación</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="toastMessage">
-            Mensaje aquí
+<body class="login-body" {% if show_register_modal %}data-show-register-modal="true" {% endif %}>
+    <!-- Contenedor de Toasts (Notificaciones) -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999">
+        <div id="notificationToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <i id="toastIcon" class="me-2"></i>
+                <strong id="toastTitle" class="me-auto">Notificación</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="toastMessage">
+                Mensaje aquí
+            </div>
         </div>
     </div>
-</div>
 
-<div class="container-fluid login-container">
-    <div class="row h-100">
-        <!-- Carrusel de Noticias-->
-        <div class="col-md-7 d-none d-md-block">
-            <div class="news-section">
-                <div id="newsCarousel" class="carousel slide h-100" data-bs-ride="carousel">
-                    <div class="carousel-inner h-100">
-                        {% if noticias_globales %}
-                        {% for noticia in noticias_globales %}
-                        <div class="carousel-item {% if forloop.first %}active{% endif %} h-100">
-                            <div class="news-card cat-{{ noticia.categoria|lower }}">
-                                <span class="news-badge cat-{{ noticia.categoria|lower }}">
-                                    <i class="fas fa-bullhorn me-1"></i>{{ noticia.categoria|capfirst }}
-                                </span>
-                                <h2 class="news-title cat-{{ noticia.categoria|lower }}">{{ noticia.titulo }}</h2>
-                                <div class="news-content">
-                                    <p>{{ noticia.contenido }}</p>
-                                </div>
-                                <div class="news-date">
-                                    <i class="fas fa-clock me-1"></i>{{ noticia.fecha_publicacion|date:"d/m/Y" }}
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                        {% else %}
-                        <!-- Noticia por defecto si no hay nada -->
-                        <div class="carousel-item active h-100">
-                            <div class="news-card">
-                                <span class="news-badge info">
-                                    <i class="fas fa-info-circle me-1"></i>Bienvenido
-                                </span>
-                                <h2 class="news-title">UHO Sistema Académico</h2>
-                                <div class="news-content">
-                                    <p>Inicie sesión para consultar sus horarios, notas y avisos importantes.</p>
-                                </div>
-                                <div class="news-date">
-                                    <i class="fas fa-university me-1"></i>Universidad de Holguín
+    <div class="container-fluid login-container">
+        <div class="row h-100">
+            <!-- Carrusel de Noticias-->
+            <div class="col-md-7 d-none d-md-block">
+                <div class="news-section">
+                    <div id="newsCarousel" class="carousel slide h-100" data-bs-ride="carousel">
+                        <div class="carousel-inner h-100">
+                            {% if noticias_globales %}
+                            {% for noticia in noticias_globales %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %} h-100">
+                                <div class="news-card cat-{{ noticia.categoria|lower }}">
+                                    <span class="news-badge cat-{{ noticia.categoria|lower }}">
+                                        <i class="fas fa-bullhorn me-1"></i>{{ noticia.categoria|capfirst }}
+                                    </span>
+                                    <h2 class="news-title cat-{{ noticia.categoria|lower }}">{{ noticia.titulo }}</h2>
+                                    <div class="news-content">
+                                        <p>{{ noticia.contenido }}</p>
+                                    </div>
+                                    <div class="news-date">
+                                        <i class="fas fa-clock me-1"></i>{{ noticia.fecha_publicacion|date:"d/m/Y" }}
+                                    </div>
                                 </div>
                             </div>
+                            {% endfor %}
+                            {% else %}
+                            <!-- Noticia por defecto si no hay nada -->
+                            <div class="carousel-item active h-100">
+                                <div class="news-card">
+                                    <span class="news-badge info">
+                                        <i class="fas fa-info-circle me-1"></i>Bienvenido
+                                    </span>
+                                    <h2 class="news-title">UHO Sistema Académico</h2>
+                                    <div class="news-content">
+                                        <p>Inicie sesión para consultar sus horarios, notas y avisos importantes.</p>
+                                    </div>
+                                    <div class="news-date">
+                                        <i class="fas fa-university me-1"></i>Universidad de Holguín
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
-                        {% endif %}
+
+                        <!-- Controles del carrusel -->
+                        <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel"
+                            data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel"
+                            data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
                     </div>
+                </div>
+            </div>
 
-                    <!-- Controles del carrusel -->
-                    <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel"
-                        data-bs-slide="prev">
-                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Anterior</span>
-                    </button>
-                    <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel"
-                        data-bs-slide="next">
-                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                        <span class="visually-hidden">Siguiente</span>
-                    </button>
+            <!-- form-->
+            <div class="col-md-5">
+                <div class="login-section">
+                    <div class="login-card">
+                        <div class="card-body p-4">
+                            <!--titulo-->
+                            <div class="text-center mb-4">
+                                <div class="login-logo mb-3">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <h3 class="fw-bold text-dark">UHO Sistema Académico</h3>
+                                <p class="text-muted">Ingrese sus credenciales</p>
+                            </div>
+
+                            <!-- form login total -->
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <!-- usuario-->
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label">Usuario</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        {{ form.username }}
+                                    </div>
+                                </div>
+
+                                <!-- pass -->
+                                <div class="mb-3">
+                                    <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        {{ form.password }}
+                                        <button type="button" class="input-group-text password-toggle"
+                                            onclick="togglePassword(null, this)">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- sesion -->
+                                <div class="mb-3 form-check">
+                                    {{ form.remember }}
+                                    <label class="form-check-label" for="{{ form.remember.id_for_label }}">
+                                        Recordar sesión
+                                    </label>
+                                </div>
+
+                                <!-- btn login -->
+                                <button type="submit" class="btn btn-uho w-100 mb-3">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                                </button>
+
+                                <div class="text-center">
+                                    <a href="#" onclick="mostrarRegistroModal(); return false;"
+                                        class="text-decoration-none registro-link">
+                                        <i class="fas fa-user-plus me-1"></i>¿No tienes cuenta? Regístrate aquí
+                                    </a>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- form-->
-        <div class="col-md-5">
-            <div class="login-section">
-                <div class="login-card">
-                    <div class="card-body p-4">
-                        <!--titulo-->
-                        <div class="text-center mb-4">
-                            <div class="login-logo mb-3">
-                                <i class="fas fa-graduation-cap"></i>
+    </div>
+    <!-- MODAL para Registro (oculto por defecto) -->
+    <div class="modal fade" id="registroModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus me-2"></i>Crear Cuenta Nueva
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="{% url 'registro' %}" id="registerForm">
+                        {% csrf_token %}
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">Usuario</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                {{ registro_form.username }}
                             </div>
-                            <h3 class="fw-bold text-dark">UHO Sistema Académico</h3>
-                            <p class="text-muted">Ingrese sus credenciales</p>
+
                         </div>
 
-                        <!-- form login total -->
-                        <form id="loginForm">
-                            <!-- user -->
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Usuario</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-user"></i>
-                                    </span>
-                                    <input type="text" class="form-control" id="username"
-                                        placeholder="Ingrese su usuario" required>
-                                </div>
+                        <div class="mb-2">
+                            <label class="form-label small mb-1">Email</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                {{ registro_form.email }}
                             </div>
 
-                            <!-- pass -->
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">
-                                        <i class="fas fa-lock"></i>
-                                    </span>
-                                    <input type="password" class="form-control" id="password"
-                                        placeholder="Ingrese su contraseña" required>
+                        </div>
+
+                        <div class="row mb-2">
+                            <div class="col-6">
+                                <label class="form-label small mb-1">Carrera</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-graduation-cap"></i></span>
+                                    {{ registro_form.carrera }}
+                                </div>
+                            </div>
+                            <div class="col-6" id="div_anio">
+                                <label class="form-label small mb-1">Año</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
+                                    {{ registro_form.anio }}
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label class="form-label small mb-1">{{ registro_form.password.label }}</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    {{ registro_form.password }}
                                     <button type="button" class="input-group-text password-toggle"
-                                        onclick="togglePassword()">
+                                        onclick="togglePassword(null, this)">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-1">{{ registro_form.password_confirm.label }}</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    {{ registro_form.password_confirm }}
+                                    <button type="button" class="input-group-text password-toggle"
+                                        onclick="togglePassword(null, this)">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
                             </div>
 
-                            <!-- sesion -->
-                            <div class="mb-3 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember">
-                                <label class="form-check-label" for="remember">
-                                    Recordar sesión
-                                </label>
-                            </div>
+                        </div>
 
-                            <!-- btn login -->
-                            <button type="submit" class="btn btn-uho w-100 mb-3">
-                                <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
-                            </button>
-
-                            <div class="text-center">
-                                <a href="#" onclick="mostrarRegistroModal(); return false;"
-                                    class="text-decoration-none registro-link">
-                                    <i class="fas fa-user-plus me-1"></i>¿No tienes cuenta? Regístrate aquí
-                                </a>
-                            </div>
-                        </form>
-                    </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                        </button>
+                    </form>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <small class="text-muted">
+                        Al registrarte, aceptas nuestros
+                        <a href="https://buymeacoffee.com/hche" class="text-decoration-none">Términos y Condiciones</a>
+                    </small>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<!-- MODAL para Registro (oculto por defecto) -->
-<div class="modal fade" id="registroModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-user-plus me-2"></i>Crear Cuenta Nueva
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="registerForm">
-                    <div class="mb-2">
-                        <label class="form-label small mb-1">Usuario</label>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            <input type="text" class="form-control form-control-sm" id="reg_username"
-                                placeholder="Usuario" required>
-                        </div>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="form-label small mb-1">Email</label>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input type="email" class="form-control form-control-sm" id="reg_email"
-                                placeholder="email@estudiante.com , email@profesor.com , email@jefedecarrera.com"
-                                required>
-                        </div>
-                    </div>
-
-                    <div class="row mb-2">
-                        <div class="col-6">
-                            <label class="form-label small mb-1">Carrera</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="fas fa-graduation-cap"></i></span>
-                                <select class="form-select form-select-sm" id="reg_carrera" required>
-                                    <option value="" selected disabled>Carrera...</option>
-                                    {% for carrera in carreras %}
-                                    <option value="{{ carrera.id }}">{{ carrera.nombre }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-6" id="div_anio">
-                            <label class="form-label small mb-1">Año</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="fas fa-calendar-alt"></i></span>
-                                <select class="form-select form-select-sm" id="reg_anio">
-                                    <option value="1">1°</option>
-                                    <option value="2">2°</option>
-                                    <option value="3">3°</option>
-                                    <option value="4">4°</option>
-                                    <option value="5">5°</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label small mb-1">Contraseña</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input type="password" class="form-control form-control-sm" id="reg_password1"
-                                    placeholder="Clave" required>
-                                <button type="button" class="input-group-text password-toggle"
-                                    onclick="togglePassword('reg_password1')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label small mb-1">Confirmar</label>
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input type="password" class="form-control form-control-sm" id="reg_password2"
-                                    placeholder="Repetir" required>
-                                <button type="button" class="input-group-text password-toggle"
-                                    onclick="togglePassword('reg_password2')">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="button" onclick="registrarUsuario()" class="btn btn-success w-100">
-                        <i class="fas fa-user-plus me-2"></i>Crear Cuenta
-                    </button>
-                </form>
-            </div>
-            <div class="modal-footer justify-content-center">
-                <small class="text-muted">
-                    Al registrarte, aceptas nuestros
-                    <a href="#" class="text-decoration-none">Términos y Condiciones</a>
-                </small>
-            </div>
-        </div>
-    </div>
-</div>
 
     <!-- Bootstrap & JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/base.js' %}"></script>
     <script src="{% static 'js/login.js' %}"></script>
+
+    {% if messages %}
+    <div id="global-messages"
+        data-messages='[{% for message in messages %}{"tags": "{{ message.tags }}", "message": "{{ message|escapejs }}"}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+    </div>
+    {% endif %}
+
+
+    <!-- Modal logic moved to login.js -->
 </body>
 
 </html>

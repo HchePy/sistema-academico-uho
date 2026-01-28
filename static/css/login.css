@@ -32,7 +32,6 @@
     display: flex;
     flex-direction: column;
     border-top: 5px solid #667eea;
-    /* Default color (Aviso) */
 }
 
 .news-badge {
@@ -44,8 +43,6 @@
     display: inline-block;
     margin-bottom: 1rem;
 }
-
-/* Eliminar clases antiguas (urgent, info) para evitar confusión */
 
 /* Titulo de la Noticia (Simplificado) */
 .news-title {
@@ -62,11 +59,6 @@
     /* Quitar cualquier raya residual */
 }
 
-/* ==========================================
-   COLORES POR CATEGORÍA (DISEÑO FINAL)
-   ========================================== */
-
-/* EXAMEN - ROJO */
 .news-card.cat-examen,
 .news-card[class*="cat-examen"] {
     border-top: 8px solid #dc3545 !important;
@@ -80,7 +72,7 @@
     color: #dc3545 !important;
 }
 
-/* EVENTO - CELESTE */
+
 .news-card.cat-evento,
 .news-card[class*="cat-evento"] {
     border-top: 8px solid #17a2b8 !important;
@@ -94,7 +86,7 @@
     color: #17a2b8 !important;
 }
 
-/* AVISO - PÚRPURA (Default) */
+
 .news-card.cat-aviso,
 .news-card[class*="cat-aviso"] {
     border-top: 8px solid #667eea !important;
@@ -231,8 +223,6 @@
     box-shadow: 0 2px 8px rgba(40, 167, 69, 0.2);
 }
 
-/* ========== ESTILOS PARA REGISTRO ========== */
-
 /* Enlace "Registrarse" */
 .registro-link {
     color: #3498db !important;
@@ -290,11 +280,9 @@
 .carousel-control-prev-icon,
 .carousel-control-next-icon {
     filter: invert(1) brightness(0.5);
-    /* Flechas oscuras para fondo claro */
 }
 
 .carousel-control-prev,
 .carousel-control-next {
     width: 60px;
-    /* Tamaño adecuado para clics */
 }

@@ -59,7 +59,35 @@ function initSidebar() {
     });
 }
 
+// 4. Utilidades
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 // Inicializaciones globales
 document.addEventListener('DOMContentLoaded', function () {
     initSidebar();
+
+    const messagesDiv = document.getElementById('global-messages');
+    if (messagesDiv && messagesDiv.dataset.messages) {
+        try {
+            const messages = JSON.parse(messagesDiv.dataset.messages);
+            messages.forEach(msg => {
+                showToast(msg.tags, 'Notificación', msg.message);
+            });
+        } catch (e) {
+            console.error('Error parsing messages:', e);
+        }
+    }
 });
